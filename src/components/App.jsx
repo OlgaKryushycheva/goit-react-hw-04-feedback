@@ -1,59 +1,63 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { Section } from './Section';
 import { FeedbackOptions } from './FedbackOptions';
 import { Notification } from './Notification';
 import { Statistics } from './Statistacs';
 
-export class App extends Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
-  };
+export const App = () => {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
-  handleClick = evt => {
+  const feedback = { good, neutral, bad };
+
+  const handleClick = evt => {
     const option = evt.target.name;
 
-    this.setState(prevState => ({
-      [option]: prevState[option] + 1,
-    }));
+    switch (option) {
+      case 'good':
+        setGood(prevState => prevState + 1);
+        break;
+      case 'neutral':
+        setNeutral(prevState => prevState + 1);
+        break;
+      case 'bad':
+        setBad(prevState => prevState + 1);
+        break;
+      default:
+        break;
+    }
   };
 
-  countTotalFeedback = (good, neutral, bad) => {
+  const countTotalFeedback = (good, neutral, bad) => {
     return good + neutral + bad;
   };
 
-  countPositiveFeedbackPercentage = (good, total) => {
+  const countPositiveFeedbackPercentage = (good, total) => {
     return Math.round((good * 100) / total);
   };
 
-  render() {
-    const { good, neutral, bad } = this.state;
-    const total = this.countTotalFeedback(good, neutral, bad);
-    const positivePercentage = this.countPositiveFeedbackPercentage(
-      good,
-      total
-    );
+  const total = countTotalFeedback(good, neutral, bad);
+  const positivePercentage = countPositiveFeedbackPercentage(good, total);
 
-    return (
-      <Section title={'Please leave feedback'}>
-        <FeedbackOptions
-          options={Object.keys(this.state)}
-          onLeaveFeedback={this.handleClick}
+  return (
+    <Section title={'Please leave feedback'}>
+      <FeedbackOptions
+        options={Object.keys(feedback)}
+        onLeaveFeedback={handleClick}
+      />
+      {total > 0 && (
+        <Statistics
+          good={good}
+          neutral={neutral}
+          bad={bad}
+          total={total}
+          positivePercentage={positivePercentage}
         />
-        {total > 0 && (
-          <Statistics
-            good={good}
-            neutral={neutral}
-            bad={bad}
-            total={total}
-            positivePercentage={positivePercentage}
-          />
-        )}
-        {total === 0 && (
-          <Notification total={total} massage={'There is no feedback'} />
-        )}
-      </Section>
-    );
-  }
-}
+      )}
+      {total === 0 && (
+        <Notification total={total} massage={'There is no feedback'} />
+      )}
+    </Section>
+  );
+};
